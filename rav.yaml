@@ -1,0 +1,8 @@
+name: rav
+
+scripts:
+  server: python3 -m http.server
+  sup: echo "sup"
+  check: venv/bin/twine check dist/*
+  build: venv/bin/python3 -m build && venv/bin/pip uninstall rav && venv/bin/pip install -e .  
+  push: venv/bin/twine upload dist/*

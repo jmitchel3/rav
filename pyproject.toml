@@ -1,0 +1,18 @@
+[project]
+name = "rav"
+version = "0.0.1"
+authors = [
+  { name="Justin Mitchel", email="hello@teamcfe.com" },
+]
+description = "A simple way to shortcut calling your various scripts. Inspired by npm scripts and make but simpler."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/jmitchel3/rev"
+"Bug Tracker" = "https://github.com/jmitchel3/rev/issues"
