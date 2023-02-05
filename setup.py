@@ -2,8 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="rav",
-    version="0.0.1",
-    description="A simple way to shortcut calling your various scripts. Inspired by npm scripts and make but simpler.",
+    description="A cross-platform Python CLI to shortcut tp command-line commands. Inspired by Makefiles and npm scripts.",
     author="Justin Mitchel",
     author_email="hello@teamcfe.com",
     url="https://github.com/jmitchel3/rav",

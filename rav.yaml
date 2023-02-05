@@ -3,6 +3,19 @@ name: rav
 scripts:
   server: python3 -m http.server
   sup: echo "sup"
+  test: venv/bin/python3 -m pytest
   check: venv/bin/twine check dist/*
-  build: venv/bin/python3 -m build && venv/bin/pip uninstall rav && venv/bin/pip install -e .  
-  push: venv/bin/twine upload dist/*
+  build: 
+    - rm -rf dist/
+    - venv/bin/python3 -m build
+    - venv/bin/pip uninstall rav
+    - venv/bin/pip install -e .  
+  push: 
+    - venv/bin/rav run build
+    - venv/bin/twine upload dist/*
+  multi: 
+      - echo this is
+      - echo awesome
+      - echo simple
+      - echo and 
+      - echo easy

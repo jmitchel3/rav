@@ -6,11 +6,13 @@ import yaml
 
 
 def make_sample(force=False):
-    
+    """Create a sample rav.yaml file"""
     sample_project = {
         "name": "rav",
         "scripts": {
-            "server": "python3 -m http.server"
+            "echo": "echo 'Hello World!\nrav is working!'",
+            "server": "python3 -m http.server",
+            "win-server": "python -m http.server",
         }
     }
     rav_sample_path = pathlib.Path("rav.sample.yaml")
@@ -28,9 +30,20 @@ def main():
     parser.add_argument("script", type=str, help="The script to run.")
     parser.add_argument("--verbose", type=bool, help="Print the command being run", default=False)
     parser.add_argument("--force", type=bool, help="Force action (not always possible)", default=False)
+    parser.add_argument("-f", "--file", type=str, help="The rav project file path", default="rav.yaml")
+    parser.add_argument("-j", "--join", type=str, help="Default for command joins work (&&)", default="&&")
+    parser.add_argument("args", nargs=argparse.REMAINDER, help="Additional arguments to to a script")
     args = parser.parse_args()
     cmd = args.script
     verbose = args.verbose
+    extra_args = args.args
+    project_file = pathlib.Path(args.file)
+    join_arg = args.join
+    if not project_file.exists():
+        print(f"Error: rav project file '{project_file}' not found.")
+        return
+    if args.file != "rav.yaml":
+        print(f"Using {project_file}.")
     if args.mode == "sample":
         make_sample(args.force)
         return
@@ -38,9 +51,9 @@ def main():
         if not cmd:
             print("Error: no script provided")
             return
-        with open("rav.yaml", "r") as f:
+        with open(project_file, "r") as f:
             project = yaml.safe_load(f)
-            scripts = project.get("scripts") or project.get("scripts") or {}
+            scripts = project.get("rav") or project.get("scripts")  or project.get('commands') or {}
             # print(project)
         try:
             command = scripts[cmd]
@@ -48,7 +61,9 @@ def main():
             print(f"Error: script '{cmd}' not found")
             return
         if isinstance(command, list):
-            command = " && ".join(command)
+            command = f" {join_arg} ".join(command)
+        if extra_args:
+            command += " " + " ".join(extra_args)
         if verbose:
             print(f"Running script: {command}")
         subprocess.run(command, shell=True)

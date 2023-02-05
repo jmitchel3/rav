@@ -1,10 +1,10 @@
 [project]
 name = "rav"
-version = "0.0.1"
+version = "0.0.3"
 authors = [
   { name="Justin Mitchel", email="hello@teamcfe.com" },
 ]
-description = "A simple way to shortcut calling your various scripts. Inspired by npm scripts and make but simpler."
+description = "A cross-platform Python CLI to shortcut tp command-line commands. Inspired by Makefiles and npm scripts."
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
