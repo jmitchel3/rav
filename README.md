@@ -2,8 +2,37 @@
 
 A cross-platform Python CLI to shortcut tp command-line commands. Inspired by Makefiles and npm scripts.
 
+### Install
+
+It's recommended that you use a virtual environment with `rav`. The only third party dependency is `PyYAML`.
+
+```
+python -m pip install rav
+```
+
+Basic Usage:
+
+```bash
+cd ~/path/to/project
+```
+
+Create `rav.yaml`:
+
+```yaml
+scripts:
+    echo: echo hello world
+```
+
+Use:
+
+```
+rav run echo
+```
+
 
 ## Create a `rav.yaml` file
+
+The configuration block is flexible. Use `rav`, `scripts`, or `commands` as the top-level key.
 
 `rav.yaml`
 ```yaml
@@ -21,13 +50,31 @@ scripts:
     win-server: venv\Scripts\python -m http.server
 ```
 
-Or if you need a custom yaml file:
+
+The following all work and will run in this exact order (`rav` first, `scripts` second, `commands` last)
 
 ```yaml
 rav:
     echo: echo "this is awesome"
     server: venv/bin/python -m http.server
 ```
+
+
+```yaml
+scripts:
+    echo: echo "this is awesome"
+    server: venv/bin/python -m http.server
+```
+
+
+```yaml
+commands:
+    echo: echo "this is awesome"
+    server: venv/bin/python -m http.server
+```
+
+
+
 
 
 ## Basic Syntax
