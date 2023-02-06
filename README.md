@@ -1,14 +1,15 @@
 # rav
 
-A cross-platform Python CLI to shortcut tp command-line commands. Inspired by Makefiles and npm scripts.
+A cross-platform Python CLI to shortcut to command-line commands. Inspired by Makefiles and npm scripts.
 
 ### Install
 
-It's recommended that you use a virtual environment with `rav`. The only third party dependency is `PyYAML`.
+It's recommended that you use a virtual environment with `rav`. 
 
 ```
-python -m pip install rav
+python3 -m pip install rav
 ```
+> Minimum python version is 3.7
 
 Basic Usage:
 
@@ -107,7 +108,7 @@ By default, `rav run` will look for a `rav.yaml` file in the current directory. 
 ## Try the built-in Sample
 
 ```
-rav sample create
+rav sample
 ```
 This will output `rav.sample.yaml` in the current directory.
 

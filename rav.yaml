@@ -13,6 +13,7 @@ scripts:
   push: 
     - venv/bin/rav run build
     - venv/bin/twine upload dist/*
+  echo: echo "hello"
   multi: 
       - echo this is
       - echo awesome
