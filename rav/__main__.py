@@ -109,6 +109,9 @@ class RavCLI:
 
     def run(self, cmd, *args, **kwargs):
         self.project.run(cmd, *args, **kwargs)
+
+    def x(self, cmd, *args, **kwargs):
+        self.project.run(cmd, *args, **kwargs)
     
     def list(self, ):
         self.project.list()

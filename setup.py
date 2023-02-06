@@ -14,8 +14,9 @@ setup(
         ]
     },
     install_requires=[
+        "fire",
         "PyYAML",
-        "fire"
+        "rich",
     ],
     python_requires=">=3.7",
 )
