@@ -115,6 +115,10 @@ class RavCLI:
         self.project = Project(
                 project_file=self.project_file, 
                 join_arg=self.join_arg)
+    
+    def version(self, ):
+        import rav
+        print(f"[bold]Version[/bold] {rav.__version__}")
 
     def run(self, cmd, *args, **kwargs):
         self.project.run(cmd, *args, **kwargs)
