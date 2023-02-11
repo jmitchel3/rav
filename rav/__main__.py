@@ -74,12 +74,21 @@ class Project:
         elif isinstance(commands, str):
             if isinstance(args, tuple):
                 commands =  f'{commands} {" ".join(args)}'
-        print(f"Running [bold green]{commands}[/bold green]\n---------------------------------------")
-        subprocess.run(commands, shell=True, check=True)
+        print(f"Running [bold green]{commands}[/bold green]")
+        try:
+            result = subprocess.run(commands, shell=True, check=True)
+            # print(result.stdout.decode().strip())
+            print("---------------------------------------")
+            print(f"Status: [bold green]Success![/bold green]")
+            print("---------------------------------------")
+            # print(f"{result}")
+        except subprocess.CalledProcessError as e:
+            print("---------------------------------------")
+            print("Status: [bold red]Error[/bold red]")
+            print("---------------------------------------")
+            print(f"{e}")
+            raise
 
-
-        
-        
 
 
 @dataclass
