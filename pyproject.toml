@@ -1,6 +1,6 @@
 [project]
 name = "rav"
-version = "0.0.8"
+version = "0.0.9"
 authors = [
   { name="Justin Mitchel", email="hello@teamcfe.com" },
 ]
@@ -12,6 +12,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+dependencies = ['fire', 'PyYAML', 'rich']
 
 [project.urls]
 "Homepage" = "https://github.com/jmitchel3/rev"

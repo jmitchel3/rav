@@ -2,7 +2,7 @@
 
 A cross-platform Python CLI to shortcut to command-line commands. Inspired by Makefiles and npm scripts.
 
-### Install
+## Install
 
 It's recommended that you use a virtual environment with `rav`. 
 
@@ -11,13 +11,22 @@ python3 -m pip install rav
 ```
 > Minimum python version is 3.7
 
+## Start new project
+
 Basic Usage:
 
 ```bash
 cd ~/path/to/project
 ```
 
-Create `rav.yaml`:
+```bash
+rav new
+```
+> Run through the setup wizard to create `rav.yaml`
+
+or
+
+Manually create `rav.yaml`
 
 ```yaml
 scripts:
@@ -31,12 +40,14 @@ rav run echo
 ```
 
 
-## Create a `rav.yaml` file
+## Manage the Rav project `rav.yaml` file
 
 The configuration block is flexible. Use `rav`, `scripts`, or `commands` as the top-level key.
 
 `rav.yaml`
 ```yaml
+name: rav-in-sixty-seconds
+
 scripts:
     echo: echo "this is awesome"
     server: venv/bin/python -m http.server
@@ -46,6 +57,8 @@ Or if on windows:
 
 `rav.yaml`
 ```yaml
+name: rav-in-sixty-seconds
+
 scripts:
     echo: echo this is awesome
     win-server: venv\Scripts\python -m http.server
@@ -73,8 +86,6 @@ commands:
     echo: echo "this is awesome"
     server: venv/bin/python -m http.server
 ```
-
-
 
 
 
