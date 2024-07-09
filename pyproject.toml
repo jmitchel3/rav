@@ -15,5 +15,5 @@ classifiers = [
 dependencies = ['fire', 'PyYAML', 'rich']
 
 [project.urls]
-"Homepage" = "https://github.com/jmitchel3/rev"
-"Bug Tracker" = "https://github.com/jmitchel3/rev/issues"
+"Homepage" = "https://github.com/jmitchel3/rav"
+"Bug Tracker" = "https://github.com/jmitchel3/rav/issues"
