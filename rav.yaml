@@ -10,9 +10,12 @@ scripts:
     - venv/bin/python3 -m build
     - venv/bin/pip uninstall rav
     - venv/bin/pip install -e .  
-  push: 
-    - venv/bin/rav run build
-    - venv/bin/twine upload dist/*
+  publish: 
+    - git add .
+    - git commit -m "Ready for release"
+    - git push
+    - git tag v0.1.1
+    - git push origin v0.1.1
   echo: echo "hello"
   fail: adfasd
   multi: 
