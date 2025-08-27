@@ -59,6 +59,12 @@ class RavCLI:
     def run(self, cmd, *args, **kwargs):
         self.get_project().run(cmd, *args, **kwargs)
 
+    def download(self, cmd, *args, **kwargs):
+        self.get_project().download(cmd, *args, **kwargs)
+
+    def downloads(self, *args, **kwargs):
+        self.download(*args, **kwargs)
+
     def x(self, cmd, *args, **kwargs):
         """Shortcut for run"""
         self.run(cmd, *args, **kwargs)

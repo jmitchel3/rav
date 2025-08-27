@@ -21,3 +21,26 @@ scripts:
       - echo simple
       - echo and 
       - echo easy
+
+  
+downloads:
+  staticfiles:
+    name: vendor
+    destination: temp/staticfiles/vendor
+    verbose: true
+    raise_on_error: true
+    overwrite: true
+    files:
+      - name: flowbite.min.css
+        overwrite: false
+        destination: temp/staticfiles/vendor/css
+        url: https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.css 
+      - name: flowbite.min.js
+        url: https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.js
+      - name: flowbite.min.js.map
+        destination: temp/staticfiles/vendor/js
+        url: https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.js.map
+      - name: htmx.min.js
+        destination: temp/staticfiles/vendor/js
+        url: https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js
+        integrity: sha384-Akqfrbj/HpNVo8k11SXBb6TlBWmXXlYQrCSqEWmyKJe+hDm3Z/B2WVG4smwBkRVm
