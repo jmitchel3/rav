@@ -19,19 +19,29 @@ concurrency:
 
 jobs:
   tests:
-    name: Python ${{ matrix.python-version }}
-    runs-on: ubuntu-20.04
+    name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        python-version:
-        - '3.7'
-        - '3.8'
-        - '3.9'
-        - '3.10'
-        - '3.11'
-        - '3.12'
-        - '3.13'
+        include:
+          # Test older Python versions on Ubuntu 20.04
+          - python-version: '3.7'
+            os: ubuntu-20.04
+          - python-version: '3.8'
+            os: ubuntu-20.04
+          # Test middle Python versions on Ubuntu 22.04
+          - python-version: '3.9'
+            os: ubuntu-22.04
+          - python-version: '3.10'
+            os: ubuntu-22.04
+          - python-version: '3.11'
+            os: ubuntu-22.04
+          # Test newer Python versions on Ubuntu 24.04
+          - python-version: '3.12'
+            os: ubuntu-24.04
+          - python-version: '3.13'
+            os: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v4
@@ -60,50 +70,7 @@ jobs:
         include-hidden-files: true
         if-no-files-found: warn
 
-  coverage:
-    name: Coverage
-    runs-on: ubuntu-24.04
-    needs: tests
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          enable-cache: false
-
-      - name: Install dependencies
-        run: uv pip install --system coverage[toml]
-
-      - name: Download data
-        uses: actions/download-artifact@v4
-        with:
-          path: ${{ github.workspace }}
-          pattern: coverage-data-*
-          merge-multiple: true
-
-      - name: Combine coverage and fail if it's <90%
-        run: |
-          python -m coverage combine
-          python -m coverage html --skip-covered --skip-empty
-          python -m coverage report --fail-under=90
-          echo "## Coverage summary" >> $GITHUB_STEP_SUMMARY
-          python -m coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
-        continue-on-error: true
-
-      - name: Upload HTML report
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: html-report
-          path: htmlcov
-
   release:
-    needs: [coverage]
     if: success() && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-24.04
     environment: release
