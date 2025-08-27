@@ -1,4 +1,4 @@
-name: CI
+name: PyPI Release
 
 on:
   push:
@@ -8,12 +8,9 @@ on:
       - '**'
     paths:
       - '.github/workflows/**'
-      - 'src/**'
-      - 'tests/**'
-      - 'sample_project/**'
+      - 'rav/**'
       - 'setup.py'
       - 'pyproject.toml'
-      - 'tox.ini'
   pull_request:
 
 concurrency:
@@ -48,7 +45,6 @@ jobs:
       uses: astral-sh/setup-uv@v4
       with:
         enable-cache: true
-        cache-dependency-glob: tests/requirements/*.txt
 
     - name: Install dependencies
       run: uv pip install --system tox tox-uv

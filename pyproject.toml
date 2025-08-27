@@ -22,3 +22,10 @@ dependencies = [
 [project.urls]
 "Homepage" = "https://github.com/jmitchel3/rav"
 "Bug Tracker" = "https://github.com/jmitchel3/rav/issues"
+
+[project.scripts]
+rav = "rav.__main__:main"
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
