@@ -29,7 +29,7 @@ It's recommended that you use a virtual environment with `rav`.
 ```bash
 python3 -m pip install rav
 ```
-> Minimum python version is 3.7
+> Minimum python version is 3.9
 
 ## Quick Start
 
