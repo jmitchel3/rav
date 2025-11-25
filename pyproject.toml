@@ -6,7 +6,7 @@ authors = [
 ]
 description = "A cross-platform Python CLI to shortcut tp command-line commands. Inspired by Makefiles and npm scripts."
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",

@@ -9,7 +9,6 @@ on:
     paths:
       - '.github/workflows/**'
       - 'rav/**'
-      - 'setup.py'
       - 'pyproject.toml'
   pull_request:
 
@@ -25,11 +24,6 @@ jobs:
     strategy:
       matrix:
         include:
-          # Test older Python versions on Ubuntu 20.04
-          - python-version: '3.7'
-            os: ubuntu-20.04
-          - python-version: '3.8'
-            os: ubuntu-20.04
           # Test middle Python versions on Ubuntu 22.04
           - python-version: '3.9'
             os: ubuntu-22.04
