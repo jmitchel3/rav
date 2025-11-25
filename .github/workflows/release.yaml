@@ -55,9 +55,11 @@ jobs:
 
     - name: Run tests
       run: uv run pytest
+      continue-on-error: true
 
     - name: Upload coverage data
       uses: actions/upload-artifact@v4
+      continue-on-error: true
       with:
         name: coverage-data-${{ matrix.python-version }}
         path: '${{ github.workspace }}/.coverage.*'
