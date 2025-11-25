@@ -3,13 +3,12 @@ name: rav
 scripts:
   server: python3 -m http.server
   sup: echo "sup"
-  test: venv/bin/python3 -m pytest
-  check: venv/bin/twine check dist/*
+  test: .venv/bin/python3 -m pytest
   build: 
     - rm -rf dist/
-    - venv/bin/python3 -m build
-    - venv/bin/pip uninstall rav
-    - venv/bin/pip install -e .  
+    - .venv/bin/python3 -m build
+    - .venv/bin/pip uninstall rav
+    - .venv/bin/pip install -e .  
   publish: 
     - git add .
     - git commit -m "Ready for release"
