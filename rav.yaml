@@ -24,6 +24,10 @@ scripts:
       - echo simple
       - echo and 
       - echo easy
+  raise: 
+    - python23 -c "raise Exception('This is an error, you need to fix it')"
+
+
 
   
 downloads:

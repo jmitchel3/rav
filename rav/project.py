@@ -1,5 +1,6 @@
 import pathlib
 import subprocess
+import sys
 import tempfile
 from dataclasses import dataclass
 
@@ -21,17 +22,17 @@ class Project:
     join_arg: str = " && "
     _file: pathlib.Path = None
     _project: dict = None
+    verbose: bool = False
+    traceback: bool = False
 
-    def __init__(self, project_file: pathlib.Path, join_arg: str = " && "):
+    def __init__(self, project_file: pathlib.Path, join_arg: str = " && ", verbose: bool = False, traceback: bool = False):
         super().__init__()
         self.join_arg = join_arg
+        self.verbose = verbose
+        self.traceback = traceback
         self._file = project_file
         # Use pathlib to get current working directory
         self.cwd = pathlib.Path.cwd()
-
-        # Log welcome message
-        rich_print("------------------[bold cyan]rav[/bold cyan]------------------")
-        rich_print(f"Using [bold green]{project_file}[/bold green]\n")
 
         # Open project file and load YAML
         if self._file.exists():
@@ -97,19 +98,34 @@ class Project:
         elif isinstance(commands, str):
             if isinstance(args, tuple):
                 commands = f'{commands} {" ".join(args)}'
-        rich_print(f"Running [bold green]{commands}[/bold green]")
+        if self.verbose:
+            rich_print("------------------[bold cyan]rav[/bold cyan]------------------")
+            rich_print(f"Using: [bold green]{self._file}[/bold green]")
+            rich_print(f"Running: [bold green]{commands}[/bold green]\n")
+        
         try:
             subprocess.run(commands, shell=True, check=True)
-            rich_print("---------------------------------------")
-            rich_print("Status: [bold green]Success![/bold green]")
-            rich_print("---------------------------------------")
-            # rich_print(f"{result}")
+            
+            if self.verbose:
+                rich_print("\n[bold green]✓ Command completed successfully[/bold green]")
+        except KeyboardInterrupt:
+            # User pressed Ctrl+C to stop the process
+            rich_print("\n\n[yellow]⏸  Stopped by user (Ctrl+C)[/yellow]")
+            sys.exit(130)  # Standard exit code for SIGINT
         except subprocess.CalledProcessError as e:
-            rich_print("---------------------------------------")
-            rich_print("Status: [bold red]Error[/bold red]")
-            rich_print("---------------------------------------")
-            rich_print(f"{e}")
-            raise
+            # Error output has already been printed by the command
+            if self.verbose:
+                rich_print(f"\n[bold red]✗ Error: Command failed with exit code {e.returncode}[/bold red]")
+                if not self.traceback:
+                    rich_print(f"[dim]Tip: Use --traceback to see full Python traceback[/dim]")
+            else:
+                rich_print(f"\n[bold red]✗ Command failed with exit code {e.returncode}[/bold red]")
+            
+            if self.traceback:
+                rich_print("\n[dim]Python traceback:[/dim]")
+                raise
+            else:
+                sys.exit(e.returncode if e.returncode else 1)
 
     def download(self, cmd, *args, **kwargs):
         download_config = self.get_download_config()

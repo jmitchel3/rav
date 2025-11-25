@@ -21,6 +21,7 @@ class RavCLI:
     project = None
     join_arg = " && "
     verbose = False
+    traceback = False
     overwrite = False
 
     def __init__(
@@ -30,11 +31,13 @@ class RavCLI:
         f=None,
         join_arg=" && ",
         verbose=False,
+        traceback=False,
         overwrite=False,
     ):
         super().__init__()
         self.join_arg = join_arg
         self.verbose = verbose
+        self.traceback = traceback
         self.overwrite = overwrite
         self.project_file = f or project or project_file
 
@@ -42,7 +45,12 @@ class RavCLI:
         self.project_file = pathlib.Path(project_file)
         if not self.project_file.exists():
             raise Exception(f"Error: rav project file '{project_file}' not found.")
-        self.project = Project(project_file=self.project_file, join_arg=self.join_arg)
+        self.project = Project(
+            project_file=self.project_file, 
+            join_arg=self.join_arg, 
+            verbose=self.verbose,
+            traceback=self.traceback
+        )
 
     def version(
         self,
