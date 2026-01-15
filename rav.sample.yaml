@@ -1,6 +1,12 @@
 name: rav
+
+variables:
+  PROJECT_NAME: myproject
+  PORT: "8000"
+
 scripts:
-  server: python3 -m http.server
+  server: python3 -m http.server ${{ vars.PORT }}
+  echo: echo "Project is ${{ vars.PROJECT_NAME }}"
 
 
 downloads:

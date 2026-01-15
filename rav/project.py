@@ -1,4 +1,6 @@
+import os
 import pathlib
+import re
 import subprocess
 import sys
 import tempfile
@@ -49,6 +51,39 @@ class Project:
             or self._project.get("commands")
             or {}
         )
+
+    def get_variables(self):
+        """Get variables from YAML config, with environment variables as fallback.
+
+        Variables defined in YAML take precedence over environment variables.
+        Supports both 'vars' and 'variables' as the key name.
+        """
+        variables = dict(os.environ)  # Start with env vars
+        yaml_vars = self._project.get("vars") or self._project.get("variables") or {}
+        if yaml_vars:
+            # Convert all values to strings and update
+            variables.update({k: str(v) for k, v in yaml_vars.items()})
+        return variables
+
+    def substitute_variables(self, value):
+        """Substitute ${{ vars.NAME }} patterns in a string.
+
+        Returns the string with all variable references replaced.
+        Raises an error if a referenced variable is not defined.
+        """
+        if not isinstance(value, str):
+            return value
+
+        pattern = r'\$\{\{\s*vars\.([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}'
+        variables = self.get_variables()
+
+        def replace_var(match):
+            var_name = match.group(1)
+            if var_name not in variables:
+                raise ValueError(f"Undefined variable: {var_name}")
+            return variables[var_name]
+
+        return re.sub(pattern, replace_var, value)
 
     def is_group_definition(self, value):
         """Check if a script entry is a group definition.
@@ -144,10 +179,15 @@ class Project:
         """Apply prefix and working_dir to a list of commands.
 
         Returns a single command string ready for execution.
+        Variables are substituted using ${{ vars.NAME }} syntax.
         """
         processed = []
         for cmd in commands:
+            # Substitute variables in the command
+            cmd = self.substitute_variables(cmd)
             if prefix:
+                # Substitute variables in the prefix too
+                prefix = self.substitute_variables(prefix)
                 cmd = f"{prefix} {cmd}"
             processed.append(cmd)
 
@@ -156,6 +196,8 @@ class Project:
 
         # Prepend working_dir change if specified
         if working_dir:
+            # Substitute variables in working_dir
+            working_dir = self.substitute_variables(working_dir)
             joined = f"cd {working_dir} && {joined}"
 
         return joined
