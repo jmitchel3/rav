@@ -77,10 +77,8 @@ class RavCLI:
         """Shortcut for run"""
         self.run(cmd, *args, **kwargs)
 
-    def list(
-        self,
-    ):
-        self.get_project().list()
+    def list(self, expanded=False):
+        self.get_project().list(expanded=expanded)
 
     def new(self, path="."):
         project_file = self.project_file

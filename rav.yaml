@@ -1,15 +1,16 @@
 name: rav
 
 scripts:
+  # Existing commands (backward compatibility)
   server: python3 -m http.server
   sup: echo "sup"
   test: .venv/bin/python3 -m pytest
-  build: 
+  build:
     - rm -rf dist/
     - .venv/bin/python3 -m build
     - .venv/bin/pip uninstall rav
-    - .venv/bin/pip install -e .  
-  publish: 
+    - .venv/bin/pip install -e .
+  publish:
     - git add .
     - git commit -m "Ready for release"
     - git push
@@ -17,13 +18,13 @@ scripts:
     - git push origin v0.1.1
   echo: echo "hello"
   fail: adfasd
-  multi: 
+  multi:
       - echo this is
       - echo awesome
       - echo simple
-      - echo and 
+      - echo and
       - echo easy
-  raise: 
+  raise:
     - python23 -c "raise Exception('This is an error, you need to fix it')"
 
 

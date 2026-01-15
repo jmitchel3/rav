@@ -4,11 +4,12 @@ A cross-platform Python CLI to shortcut to command-line commands with powerful f
 
 ## Features
 
-✨ **Script Management**: Define and run custom command shortcuts  
-📦 **File Downloads**: Download files with integrity verification  
-🔒 **Security**: Subresource Integrity (SRI) hash verification  
-🎨 **Rich Output**: Beautiful terminal output with progress indicators  
-⚡ **Multiple Formats**: Support for single commands and multi-command sequences  
+✨ **Script Management**: Define and run custom command shortcuts
+🔗 **Command Groups**: Share `working_dir` and `prefix` across related commands
+📦 **File Downloads**: Download files with integrity verification
+🔒 **Security**: Subresource Integrity (SRI) hash verification
+🎨 **Rich Output**: Beautiful terminal output with progress indicators
+⚡ **Multiple Formats**: Support for single commands and multi-command sequences
 🔧 **Flexible Config**: Use `rav`, `scripts`, or `commands` as top-level keys  
 
 ## Table of Contents
@@ -17,6 +18,7 @@ A cross-platform Python CLI to shortcut to command-line commands with powerful f
 - [Quick Start](#quick-start)
 - [CLI Commands Reference](#cli-commands-reference)
 - [Script Configuration](#script-configuration)
+- [Command Groups](#command-groups)
 - [File Downloads](#file-downloads)
 - [Integrity Verification](#integrity-verification)
 - [Complete Examples](#complete-examples)
@@ -251,6 +253,148 @@ This is the same as running:
 
 ```
 echo this is && echo awesome && echo simple && echo and && echo easy
+```
+
+## Command Groups
+
+Command groups allow you to define shared `working_dir` and `prefix` settings that are inherited by related commands. This is useful when you have multiple commands that share common configuration.
+
+### Basic Group Syntax
+
+Define a group using a name ending with `:` pattern. Commands prefixed with that group name inherit its settings:
+
+```yaml
+scripts:
+    # Group definition
+    backend:
+        working_dir: backend/src
+        prefix: "uv run"
+        cmd: uvicorn app:application --reload
+
+    # These inherit working_dir and prefix from backend:
+    backend:migrate: python manage.py migrate
+    backend:shell: python manage.py shell
+    backend:test: pytest
+```
+
+Running `rav run backend:migrate` executes:
+```bash
+cd backend/src && uv run python manage.py migrate
+```
+
+### Group Configuration Options
+
+| Option | Description |
+|--------|-------------|
+| `working_dir` | Directory to `cd` into before running commands |
+| `prefix` | String prepended to each command |
+| `cmd` | Default command when running the group itself |
+
+### Overriding Group Settings
+
+Individual commands can override their group's settings:
+
+```yaml
+scripts:
+    backend:
+        working_dir: backend/src
+        prefix: "uv run"
+        cmd: uvicorn app:application --reload
+
+    # Inherits both working_dir and prefix
+    backend:migrate: python manage.py migrate
+
+    # Override just the prefix (empty = no prefix)
+    backend:install:
+        prefix:
+        cmd: uv sync --dev
+
+    # Override both working_dir and prefix
+    backend:docs:
+        working_dir: backend/docs
+        prefix: "mkdocs"
+        cmd: serve
+```
+
+### Real-World Example: Django with Doppler and UV
+
+Using command groups with secret injection and Python environment management:
+
+```yaml
+scripts:
+    # Backend group with uv runner
+    backend:
+        working_dir: backend/src
+        prefix: "uv run python manage.py"
+
+    backend:migrate: migrate
+    backend:makemigrations: makemigrations
+    backend:createsuperuser: createsuperuser
+    backend:shell: shell
+    backend:collectstatic: collectstatic --noinput
+
+    # Production with secrets injection
+    prod:
+        working_dir: backend/src
+        prefix: "doppler run -- uv run python manage.py"
+
+    prod:migrate: migrate
+    prod:collectstatic: collectstatic --noinput
+
+    # Frontend group
+    frontend:
+        working_dir: frontend
+        prefix: "npm run"
+
+    frontend:dev: dev
+    frontend:build: build
+    frontend:test: test
+```
+
+Usage:
+```bash
+rav run backend:migrate           # → cd backend/src && uv run python manage.py migrate
+rav run prod:migrate              # → cd backend/src && doppler run -- uv run python manage.py migrate
+rav run frontend:build            # → cd frontend && npm run build
+```
+
+### Multi-Command Groups
+
+Groups work with multi-command lists too:
+
+```yaml
+scripts:
+    backend:
+        working_dir: backend/src
+        prefix: "uv run"
+
+    backend:setup:
+        - echo "Setting up database..."
+        - python manage.py migrate
+        - python manage.py collectstatic --noinput
+        - echo "Setup complete!"
+```
+
+Each command in the list gets the prefix applied:
+```bash
+cd backend/src && uv run echo "Setting up database..." && uv run python manage.py migrate && ...
+```
+
+### Passing Arguments
+
+Arguments are appended to the last command:
+
+```bash
+rav run backend:migrate myapp
+# → cd backend/src && uv run python manage.py migrate myapp
+```
+
+### Expanded List View
+
+Use `--expanded` to see fully resolved commands:
+
+```bash
+rav list --expanded
 ```
 
 ## File Downloads

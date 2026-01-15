@@ -50,6 +50,116 @@ class Project:
             or {}
         )
 
+    def is_group_definition(self, value):
+        """Check if a script entry is a group definition.
+
+        A group definition is a dict that has at least one of:
+        prefix, working_dir, or cmd keys.
+        """
+        if not isinstance(value, dict):
+            return False
+        group_keys = {"prefix", "working_dir", "cmd"}
+        return bool(group_keys & set(value.keys()))
+
+    def get_group_name(self, cmd):
+        """Extract group name from a command.
+
+        'backend:migrate' -> 'backend'
+        'backend:env:overwrite' -> 'backend'
+        'echo' -> None
+        """
+        if ":" not in cmd:
+            return None
+        return cmd.split(":")[0]
+
+    def get_group_config(self, group_name):
+        """Get the configuration for a group if it exists.
+
+        Group definitions can be either 'groupname' or 'groupname:' in YAML.
+        Returns dict with prefix, working_dir, or None if group doesn't exist.
+        """
+        if not group_name:
+            return None
+        scripts = self.scripts()
+        # Try both 'groupname' and 'groupname:' as valid group definition keys
+        group_value = scripts.get(group_name) or scripts.get(f"{group_name}:")
+        if not group_value:
+            return None
+        if not self.is_group_definition(group_value):
+            return None
+        return group_value
+
+    def resolve_command_config(self, cmd):
+        """Resolve the full configuration for a command, including inheritance.
+
+        Returns a dict with:
+        - commands: list of command strings to run
+        - working_dir: directory to run in (or None)
+        - prefix: prefix to prepend (or None)
+        """
+        scripts = self.scripts()
+        value = scripts.get(cmd)
+
+        # Get group config if applicable
+        group_name = self.get_group_name(cmd)
+        group_config = self.get_group_config(group_name)
+
+        # Start with group defaults
+        working_dir = group_config.get("working_dir") if group_config else None
+        prefix = group_config.get("prefix") if group_config else None
+
+        # Determine the actual commands
+        if isinstance(value, str):
+            # Simple string command
+            commands = [value]
+        elif isinstance(value, list):
+            # List of commands
+            commands = value
+        elif isinstance(value, dict):
+            # Dict format - may override group settings
+            # Check for prefix override (empty string means no prefix)
+            if "prefix" in value:
+                prefix = value.get("prefix") or None
+            # Check for working_dir override
+            if "working_dir" in value:
+                working_dir = value.get("working_dir")
+            # Get the command(s)
+            cmd_value = value.get("cmd")
+            if isinstance(cmd_value, str):
+                commands = [cmd_value]
+            elif isinstance(cmd_value, list):
+                commands = cmd_value
+            else:
+                commands = []
+        else:
+            commands = []
+
+        return {
+            "commands": commands,
+            "working_dir": working_dir,
+            "prefix": prefix,
+        }
+
+    def apply_prefix_and_working_dir(self, commands, prefix=None, working_dir=None):
+        """Apply prefix and working_dir to a list of commands.
+
+        Returns a single command string ready for execution.
+        """
+        processed = []
+        for cmd in commands:
+            if prefix:
+                cmd = f"{prefix} {cmd}"
+            processed.append(cmd)
+
+        # Join commands
+        joined = self.join_commands(processed)
+
+        # Prepend working_dir change if specified
+        if working_dir:
+            joined = f"cd {working_dir} && {joined}"
+
+        return joined
+
     def get_download_config(self):
         return self._project.get("downloads", {})
 
@@ -73,10 +183,40 @@ class Project:
         table.add_column("Command", style="cyan")
         table.add_column("Script")
         for cmd, value in scripts.items():
-            if isinstance(value, list):
+            if expanded:
+                # Show fully resolved command with prefix and working_dir
+                config = self.resolve_command_config(cmd)
+                resolved = self.apply_prefix_and_working_dir(
+                    config["commands"],
+                    prefix=config["prefix"],
+                    working_dir=config["working_dir"],
+                )
+                table.add_row(f"{cmd}", resolved)
+            elif self.is_group_definition(value):
+                # Show group definition info
+                parts = []
+                if value.get("working_dir"):
+                    parts.append(f"[dim]cd {value['working_dir']}[/dim]")
+                if value.get("prefix"):
+                    parts.append(f"[dim]{value['prefix']}[/dim]")
+                if value.get("cmd"):
+                    cmd_val = value["cmd"]
+                    if isinstance(cmd_val, list):
+                        parts.append(self.join_commands(cmd_val))
+                    else:
+                        parts.append(cmd_val)
+                table.add_row(f"{cmd}", " → ".join(parts) if parts else "[dim](group)[/dim]")
+            elif isinstance(value, list):
                 table.add_row(f"{cmd}", self.join_commands(value))
+            elif isinstance(value, dict) and "cmd" in value:
+                # Dict with cmd key
+                cmd_val = value["cmd"]
+                if isinstance(cmd_val, list):
+                    table.add_row(f"{cmd}", self.join_commands(cmd_val))
+                else:
+                    table.add_row(f"{cmd}", str(cmd_val))
             else:
-                table.add_row(f"{cmd}", value)
+                table.add_row(f"{cmd}", str(value) if value else "")
         rich_print()
         rich_print(table)
 
@@ -90,22 +230,36 @@ class Project:
             )
             rich_print("---------------------------------------\n")
             return
-        commands = scripts[cmd]
-        if isinstance(commands, list):
-            if isinstance(args, tuple):
-                commands = [f'{cmd} {" ".join(args)}' for cmd in commands]
-            commands = self.join_commands(commands)
-        elif isinstance(commands, str):
-            if isinstance(args, tuple):
-                commands = f'{commands} {" ".join(args)}'
+
+        # Resolve command config with group inheritance
+        config = self.resolve_command_config(cmd)
+        command_list = config["commands"]
+        working_dir = config["working_dir"]
+        prefix = config["prefix"]
+
+        # Append any extra args to the last command
+        if args:
+            args_str = " ".join(args)
+            if command_list:
+                command_list[-1] = f"{command_list[-1]} {args_str}"
+
+        # Apply prefix and working_dir
+        commands = self.apply_prefix_and_working_dir(
+            command_list, prefix=prefix, working_dir=working_dir
+        )
+
         if self.verbose:
             rich_print("------------------[bold cyan]rav[/bold cyan]------------------")
             rich_print(f"Using: [bold green]{self._file}[/bold green]")
+            if working_dir:
+                rich_print(f"Working dir: [bold blue]{working_dir}[/bold blue]")
+            if prefix:
+                rich_print(f"Prefix: [bold blue]{prefix}[/bold blue]")
             rich_print(f"Running: [bold green]{commands}[/bold green]\n")
-        
+
         try:
             subprocess.run(commands, shell=True, check=True)
-            
+
             if self.verbose:
                 rich_print("\n[bold green]✓ Command completed successfully[/bold green]")
         except KeyboardInterrupt:
@@ -120,7 +274,7 @@ class Project:
                     rich_print(f"[dim]Tip: Use --traceback to see full Python traceback[/dim]")
             else:
                 rich_print(f"\n[bold red]✗ Command failed with exit code {e.returncode}[/bold red]")
-            
+
             if self.traceback:
                 rich_print("\n[dim]Python traceback:[/dim]")
                 raise
