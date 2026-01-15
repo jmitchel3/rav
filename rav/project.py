@@ -148,8 +148,17 @@ class Project:
             # Simple string command
             commands = [value]
         elif isinstance(value, list):
-            # List of commands
-            commands = value
+            # List of commands - extract cmd from any dict items
+            commands = []
+            for item in value:
+                if isinstance(item, dict):
+                    cmd_val = item.get("cmd")
+                    if isinstance(cmd_val, list):
+                        commands.extend(cmd_val)
+                    elif cmd_val:
+                        commands.append(cmd_val)
+                else:
+                    commands.append(item)
         elif isinstance(value, dict):
             # Dict format - may override group settings
             # Check for prefix override (empty string means no prefix)
@@ -249,7 +258,22 @@ class Project:
                         parts.append(cmd_val)
                 table.add_row(f"{cmd}", " → ".join(parts) if parts else "[dim](group)[/dim]")
             elif isinstance(value, list):
-                table.add_row(f"{cmd}", self.join_commands(value))
+                # Handle lists that may contain dict items
+                display_items = []
+                for item in value:
+                    if isinstance(item, dict):
+                        # Dict item - show cmd value or repr
+                        if "cmd" in item:
+                            cmd_val = item["cmd"]
+                            if isinstance(cmd_val, list):
+                                display_items.append(self.join_commands(cmd_val))
+                            else:
+                                display_items.append(str(cmd_val))
+                        else:
+                            display_items.append(str(item))
+                    else:
+                        display_items.append(str(item))
+                table.add_row(f"{cmd}", self.join_commands(display_items))
             elif isinstance(value, dict) and "cmd" in value:
                 # Dict with cmd key
                 cmd_val = value["cmd"]
