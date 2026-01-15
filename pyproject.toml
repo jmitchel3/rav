@@ -1,6 +1,6 @@
 [project]
 name = "rav"
-version = "0.4.0"
+version = "0.4.1"
 authors = [
   { name="Justin Mitchel", email="hello@teamcfe.com" },
 ]
@@ -35,8 +35,3 @@ rav = "rav.__main__:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[dependency-groups]
-dev = [
-    "pytest>=7.4.4",
-]
