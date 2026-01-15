@@ -10,7 +10,8 @@ A cross-platform Python CLI to shortcut to command-line commands with powerful f
 🔒 **Security**: Subresource Integrity (SRI) hash verification
 🎨 **Rich Output**: Beautiful terminal output with progress indicators
 ⚡ **Multiple Formats**: Support for single commands and multi-command sequences
-🔧 **Flexible Config**: Use `rav`, `scripts`, or `commands` as top-level keys  
+🔧 **Flexible Config**: Use `rav`, `scripts`, or `commands` as top-level keys
+🔀 **Variables**: Define reusable values with `${{ vars.NAME }}` syntax  
 
 ## Table of Contents
 
@@ -18,6 +19,7 @@ A cross-platform Python CLI to shortcut to command-line commands with powerful f
 - [Quick Start](#quick-start)
 - [CLI Commands Reference](#cli-commands-reference)
 - [Script Configuration](#script-configuration)
+- [Variables](#variables)
 - [Command Groups](#command-groups)
 - [File Downloads](#file-downloads)
 - [Integrity Verification](#integrity-verification)
@@ -253,6 +255,89 @@ This is the same as running:
 
 ```
 echo this is && echo awesome && echo simple && echo and && echo easy
+```
+
+## Variables
+
+Define reusable values with `${{ vars.NAME }}` syntax. Great for templates and boilerplates where configuration varies between projects.
+
+### Basic Usage
+
+```yaml
+vars:
+  PROJECT_NAME: myproject
+  PORT: "8000"
+
+scripts:
+  server: uv run uvicorn ${{ vars.PROJECT_NAME }}.asgi:application --port ${{ vars.PORT }}
+  migrate: uv run python manage.py migrate
+  echo: echo "Running ${{ vars.PROJECT_NAME }}"
+```
+
+Run with:
+
+```bash
+rav run server
+# Executes: uv run uvicorn myproject.asgi:application --port 8000
+```
+
+### Configuration Keys
+
+Both `vars` and `variables` work as the top-level key:
+
+```yaml
+vars:
+  PROJECT_NAME: myproject
+```
+
+```yaml
+variables:
+  PROJECT_NAME: myproject
+```
+
+### Environment Variable Fallback
+
+Variables fall back to environment variables if not defined in YAML:
+
+```yaml
+scripts:
+  whoami: echo "Home is ${{ vars.HOME }}"  # Uses $HOME from environment
+  greet: echo "Hello ${{ vars.USER }}"     # Uses $USER from environment
+```
+
+### Variables with Command Groups
+
+Variables work seamlessly with command groups:
+
+```yaml
+vars:
+  PROJECT_NAME: myproject
+  PYTHON: uv run python
+
+scripts:
+  backend:
+    working_dir: backend/src
+    prefix: ${{ vars.PYTHON }}
+
+  backend:server: manage.py runserver
+  backend:migrate: manage.py migrate
+```
+
+### View Resolved Variables
+
+Use `rav list --expanded` to see commands with variables resolved:
+
+```bash
+rav list --expanded
+```
+
+```
+┏━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Command ┃ Script                                               ┃
+┡━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ server  │ uv run uvicorn myproject.asgi:application --port 8000│
+│ echo    │ echo "Running myproject"                             │
+└─────────┴──────────────────────────────────────────────────────┘
 ```
 
 ## Command Groups
